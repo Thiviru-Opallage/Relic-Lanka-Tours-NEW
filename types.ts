@@ -9,11 +9,18 @@ export interface TourActivity {
   image: string;
 }
 
+export interface HotelOption {
+  name: string;
+  image: string;
+}
+
 export interface Tour {
   id: string;
   title: string;
   location: string;
   price: number;
+  price_luxury?: number;
+  price_semi_luxury?: number;
   days: number;
   nights: number;
   category: 'Nature' | 'Culture' | 'Luxury' | 'Adventure';
@@ -27,6 +34,8 @@ export interface Tour {
   includedActivities: string[];
   destinations: TourDestination[];
   activities: TourActivity[];
+  hotels_luxury?: HotelOption[];
+  hotels_semi_luxury?: HotelOption[];
 }
 
 export interface Testimonial {

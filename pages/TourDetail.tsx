@@ -11,6 +11,7 @@ export const TourDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'destinations' | 'activities'>('overview');
   const { tours } = useData();
+  const [selectedPackage, setSelectedPackage] = useState<'base' | 'luxury' | 'semi_luxury'>('base');
   
   // Find tour
   const tour = tours.find(t => t.id === id);
@@ -21,6 +22,15 @@ export const TourDetail: React.FC = () => {
   }, [id]);
 
   if (!tour) return <div className="p-20 text-center">Tour Not Found</div>;
+
+  const getPrice = () => {
+      let price = tour.price;
+      if (selectedPackage === 'luxury' && tour.price_luxury) price += tour.price_luxury;
+      if (selectedPackage === 'semi_luxury' && tour.price_semi_luxury) price += tour.price_semi_luxury;
+      return price;
+  };
+
+  const currentHotels = selectedPackage === 'luxury' ? tour.hotels_luxury : selectedPackage === 'semi_luxury' ? tour.hotels_semi_luxury : [];
 
   return (
     <div className="bg-white">
@@ -125,6 +135,27 @@ export const TourDetail: React.FC = () => {
                          )}
                       </div>
                   )}
+
+                  {/* Hotel Details for Selected Package */}
+                  {currentHotels && currentHotels.length > 0 && (
+                      <div className="mt-8">
+                          <h3 className="text-2xl font-serif font-bold mb-4 text-primary">
+                              {selectedPackage === 'luxury' ? 'Luxury Hotels' : 'Semi-Luxury Hotels'}
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {currentHotels.map((hotel, idx) => (
+                                  <div key={idx} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                      <div className="h-48 overflow-hidden">
+                                          <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover" />
+                                      </div>
+                                      <div className="p-4">
+                                          <h4 className="font-bold text-primary">{hotel.name}</h4>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                      </div>
+                  )}
                 </div>
               )}
 
@@ -193,9 +224,54 @@ export const TourDetail: React.FC = () => {
                <div className="mb-6">
                  <span className="text-gray-400 text-sm">Starting from</span>
                  <div className="flex items-baseline">
-                   <span className="text-4xl font-serif font-bold text-primary">${tour.price}</span>
+                   <span className="text-4xl font-serif font-bold text-primary">${getPrice()}</span>
                    <span className="text-gray-500 ml-2">/ person</span>
                  </div>
+               </div>
+
+               <div className="mb-6 space-y-3">
+                   <label className="block text-sm font-medium text-gray-700">Select Hotel Package</label>
+
+                   {/* Standard/Base Option */}
+                   <div
+                       onClick={() => setSelectedPackage('base')}
+                       className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'base' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
+                   >
+                       <div className="flex justify-between items-center">
+                           <span className="font-medium text-gray-700">Standard Package</span>
+                           <span className="text-sm text-gray-500">Base Price</span>
+                       </div>
+                   </div>
+
+                   {/* Luxury Option */}
+                   {(tour.price_luxury || (tour.hotels_luxury && tour.hotels_luxury.length > 0)) && (
+                       <div
+                           onClick={() => setSelectedPackage('luxury')}
+                           className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
+                       >
+                           <div className="flex justify-between items-center">
+                               <span className="font-medium text-gray-700">Luxury Package</span>
+                               {tour.price_luxury ? (
+                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_luxury}</span>
+                               ) : null}
+                           </div>
+                       </div>
+                   )}
+
+                   {/* Semi-Luxury Option */}
+                   {(tour.price_semi_luxury || (tour.hotels_semi_luxury && tour.hotels_semi_luxury.length > 0)) && (
+                       <div
+                           onClick={() => setSelectedPackage('semi_luxury')}
+                           className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'semi_luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
+                       >
+                           <div className="flex justify-between items-center">
+                               <span className="font-medium text-gray-700">Semi-Luxury Package</span>
+                               {tour.price_semi_luxury ? (
+                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_semi_luxury}</span>
+                               ) : null}
+                           </div>
+                       </div>
+                   )}
                </div>
 
                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
