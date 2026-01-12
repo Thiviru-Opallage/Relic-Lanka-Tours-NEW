@@ -36,7 +36,8 @@ const init = () => {
             price_luxury INTEGER,
             price_semi_luxury INTEGER,
             hotels_luxury TEXT,
-            hotels_semi_luxury TEXT
+            hotels_semi_luxury TEXT,
+            price_child INTEGER
         )`);
 
         // Migrations for existing tours table
@@ -44,7 +45,8 @@ const init = () => {
             "price_luxury INTEGER",
             "price_semi_luxury INTEGER",
             "hotels_luxury TEXT",
-            "hotels_semi_luxury TEXT"
+            "hotels_semi_luxury TEXT",
+            "price_child INTEGER"
         ];
 
         migrationColumns.forEach(colDef => {

@@ -11,7 +11,9 @@ export const TourDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'destinations' | 'activities'>('overview');
   const { tours } = useData();
-  const [selectedPackage, setSelectedPackage] = useState<'base' | 'luxury' | 'semi_luxury'>('base');
+  const [selectedPackage, setSelectedPackage] = useState<'luxury' | 'semi_luxury'>('luxury');
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
   
   // Find tour
   const tour = tours.find(t => t.id === id);
@@ -24,10 +26,16 @@ export const TourDetail: React.FC = () => {
   if (!tour) return <div className="p-20 text-center">Tour Not Found</div>;
 
   const getPrice = () => {
-      let price = tour.price;
-      if (selectedPackage === 'luxury' && tour.price_luxury) price += tour.price_luxury;
-      if (selectedPackage === 'semi_luxury' && tour.price_semi_luxury) price += tour.price_semi_luxury;
-      return price;
+      let total = 0;
+      const extra = selectedPackage === 'luxury' ? (tour.price_luxury || 0) : (tour.price_semi_luxury || 0);
+
+      const adultPrice = tour.price + extra;
+      const childPrice = (tour.price_child || 0) + extra;
+
+      total += adults * adultPrice;
+      total += children * childPrice;
+
+      return total;
   };
 
   const currentHotels = selectedPackage === 'luxury' ? tour.hotels_luxury : selectedPackage === 'semi_luxury' ? tour.hotels_semi_luxury : [];
@@ -222,29 +230,17 @@ export const TourDetail: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
                <div className="mb-6">
-                 <span className="text-gray-400 text-sm">Starting from</span>
+                 <span className="text-gray-400 text-sm">Total Price</span>
                  <div className="flex items-baseline">
                    <span className="text-4xl font-serif font-bold text-primary">${getPrice()}</span>
-                   <span className="text-gray-500 ml-2">/ person</span>
                  </div>
                </div>
 
                <div className="mb-6 space-y-3">
                    <label className="block text-sm font-medium text-gray-700">Select Hotel Package</label>
 
-                   {/* Standard/Base Option */}
-                   <div
-                       onClick={() => setSelectedPackage('base')}
-                       className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'base' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
-                   >
-                       <div className="flex justify-between items-center">
-                           <span className="font-medium text-gray-700">Standard Package</span>
-                           <span className="text-sm text-gray-500">Base Price</span>
-                       </div>
-                   </div>
-
                    {/* Luxury Option */}
-                   {(tour.price_luxury || (tour.hotels_luxury && tour.hotels_luxury.length > 0)) && (
+                   {(tour.price_luxury || (tour.hotels_luxury && tour.hotels_luxury.length > 0) || true) && (
                        <div
                            onClick={() => setSelectedPackage('luxury')}
                            className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
@@ -252,14 +248,14 @@ export const TourDetail: React.FC = () => {
                            <div className="flex justify-between items-center">
                                <span className="font-medium text-gray-700">Luxury Package</span>
                                {tour.price_luxury ? (
-                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_luxury}</span>
+                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_luxury} per person</span>
                                ) : null}
                            </div>
                        </div>
                    )}
 
                    {/* Semi-Luxury Option */}
-                   {(tour.price_semi_luxury || (tour.hotels_semi_luxury && tour.hotels_semi_luxury.length > 0)) && (
+                   {(tour.price_semi_luxury || (tour.hotels_semi_luxury && tour.hotels_semi_luxury.length > 0) || true) && (
                        <div
                            onClick={() => setSelectedPackage('semi_luxury')}
                            className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'semi_luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
@@ -267,7 +263,7 @@ export const TourDetail: React.FC = () => {
                            <div className="flex justify-between items-center">
                                <span className="font-medium text-gray-700">Semi-Luxury Package</span>
                                {tour.price_semi_luxury ? (
-                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_semi_luxury}</span>
+                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_semi_luxury} per person</span>
                                ) : null}
                            </div>
                        </div>
@@ -283,21 +279,34 @@ export const TourDetail: React.FC = () => {
                    </div>
                  </div>
                  
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Guests</label>
-                   <div className="relative">
-                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                     <select className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none appearance-none">
-                       <option>2 Adults</option>
-                       <option>1 Adult</option>
-                       <option>2 Adults, 1 Child</option>
-                       <option>Group (4+)</option>
-                     </select>
-                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                   </div>
+                 <div className="grid grid-cols-2 gap-4">
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">Adults</label>
+                       <div className="relative">
+                         <input
+                            type="number"
+                            min="1"
+                            value={adults}
+                            onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none"
+                         />
+                       </div>
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">Children</label>
+                       <div className="relative">
+                         <input
+                            type="number"
+                            min="0"
+                            value={children}
+                            onChange={(e) => setChildren(Math.max(0, parseInt(e.target.value) || 0))}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none"
+                         />
+                       </div>
+                     </div>
                  </div>
 
-                 <Button size="lg" className="w-full mt-2">Request Quote</Button>
+                 <Button size="lg" className="w-full mt-2">Book Tour</Button>
                  <p className="text-xs text-center text-gray-400 mt-3">No payment required yet.</p>
                </form>
                

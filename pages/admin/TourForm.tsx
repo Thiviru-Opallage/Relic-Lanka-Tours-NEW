@@ -17,6 +17,7 @@ export const TourForm: React.FC = () => {
     title: '',
     location: '',
     price: 0,
+    price_child: 0,
     price_luxury: 0,
     price_semi_luxury: 0,
     days: 1,
@@ -51,7 +52,8 @@ export const TourForm: React.FC = () => {
             hotels_luxury: existingTour.hotels_luxury || [],
             hotels_semi_luxury: existingTour.hotels_semi_luxury || [],
             price_luxury: existingTour.price_luxury || 0,
-            price_semi_luxury: existingTour.price_semi_luxury || 0
+            price_semi_luxury: existingTour.price_semi_luxury || 0,
+            price_child: existingTour.price_child || 0
         });
       }
     }
@@ -59,7 +61,7 @@ export const TourForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: ['price', 'days', 'nights', 'price_luxury', 'price_semi_luxury'].includes(name) ? Number(value) : value }));
+    setFormData(prev => ({ ...prev, [name]: ['price', 'price_child', 'days', 'nights', 'price_luxury', 'price_semi_luxury'].includes(name) ? Number(value) : value }));
   };
 
   const handleArrayChange = (field: 'highlights' | 'inclusions' | 'includedActivities', index: number, value: string) => {
@@ -205,8 +207,12 @@ export const TourForm: React.FC = () => {
                 </select>
             </div>
              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Adult Base Price ($)</label>
                 <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-ceylon-500 outline-none" />
+            </div>
+             <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Child Base Price ($)</label>
+                <input type="number" name="price_child" value={formData.price_child || 0} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-ceylon-500 outline-none" />
             </div>
              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Days</label>

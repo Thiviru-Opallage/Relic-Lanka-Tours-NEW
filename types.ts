@@ -18,7 +18,8 @@ export interface Tour {
   id: string;
   title: string;
   location: string;
-  price: number;
+  price: number; // Base Adult Price
+  price_child?: number; // Base Child Price
   price_luxury?: number;
   price_semi_luxury?: number;
   days: number;
