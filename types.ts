@@ -67,6 +67,8 @@ export interface SocialMedia {
   whatsapp: string; // Phone number for WhatsApp
   twitter?: string;
   youtube?: string;
+  wechat_id?: string;
+  wechat_qr?: string;
 }
 
 export interface GalleryImage {
