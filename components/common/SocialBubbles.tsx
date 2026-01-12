@@ -50,11 +50,10 @@ export const SocialBubbles: React.FC = () => {
 
                 <button
                     onClick={() => setIsWeChatOpen(!isWeChatOpen)}
-                    className="bg-[#07C160] text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center relative"
+                    className="bg-white text-white p-2 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center relative border border-gray-100 overflow-hidden w-16 h-16"
                     aria-label="Chat on WeChat"
                 >
-                    <MessageCircle size={32} />
-                    {/* Tiny visual distinction if needed, e.g. WC text or icon overlay */}
+                    <img src="/assets/wechat-icon.png" alt="WeChat" className="w-full h-full object-cover" />
                 </button>
             </>
         )}
