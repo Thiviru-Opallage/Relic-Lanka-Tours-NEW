@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Calendar, CheckCircle, ChevronDown, User, ArrowLeft, Camera, Flag } from 'lucide-react';
-import { useData } from '../context/DataContext'; // Changed to useData
+import { useData } from '../context/DataContext'; 
 import { Button } from '../components/ui/Button';
 import { Section } from '../components/ui/Section';
 import { TourCard } from '../components/features/TourCard';
@@ -13,9 +13,19 @@ export const TourDetail: React.FC = () => {
   const [selectedPackage, setSelectedPackage] = useState<'luxury' | 'semi_luxury'>('luxury');
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [includePhotography, setIncludePhotography] = useState(false);
   
   // Find tour
   const tour = tours.find(t => t.id === id);
+
+  const bookingRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBooking = () => {
+    bookingRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  };
   
   // Scroll to top on load
   useEffect(() => {
@@ -27,13 +37,13 @@ export const TourDetail: React.FC = () => {
   const getPrice = () => {
       let total = 0;
       const extra = selectedPackage === 'luxury' ? (tour.price_luxury || 0) : (tour.price_semi_luxury || 0);
+      const photographyExtra = includePhotography ? (tour.price_photography || 0) : 0;
 
-      const adultPrice = tour.price + extra;
-      const childPrice = (tour.price_child || 0) + extra;
+      const adultPrice = tour.price + extra + photographyExtra;
+      const childPrice = (tour.price_child || 0) + extra + photographyExtra;
 
       total += adults * adultPrice;
       total += children * childPrice;
-
       return total;
   };
 
@@ -224,119 +234,141 @@ export const TourDetail: React.FC = () => {
           </div>
 
           {/* Sidebar Booking */}
-          <div className="lg:col-span-1">
+          <div ref={bookingRef} className="lg:col-span-1">
             <div className="sticky top-24 bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-               <div className="mb-6">
-                 <span className="text-gray-500 text-sm uppercase tracking-wider block mb-1">Starting at</span>
-                 <div className="flex items-baseline mb-1">
-                   <span className="text-4xl font-serif font-bold text-primary">LKR {getPrice().toLocaleString()}</span>
-                 </div>
-                 <span className="text-gray-400 text-sm">Per Person</span>
-               </div>
+              <div className="mb-6">
+                <span className="text-gray-500 text-sm uppercase tracking-wider block mb-1">Starting at</span>
+                <div className="flex items-baseline mb-1">
+                  <span className="text-4xl font-serif font-bold text-primary">LKR {getPrice().toLocaleString()}</span>
+                </div>
+              </div>
 
-               <div className="flex items-center mb-6 mt-4 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-200">
-                    <img src="https://ui-avatars.com/api/?name=Devmini+Gunaratne&background=random" alt="Devmini Gunaratne" className="w-full h-full object-cover" />
-                 </div>
-                 <div>
-                    <h5 className="font-bold text-sm text-primary">Hello! I'm Devmini Gunaratne</h5>
-                    <p className="text-xs text-gray-500 leading-tight">Your dedicated Destination Expert. Let's plan your dream getaway!</p>
-                 </div>
-               </div>
+              <div className="flex items-center mb-6 mt-4 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-200">
+                  <img src="https://ui-avatars.com/api/?name=Devmini+Gunaratne&background=random" alt="Devmini Gunaratne" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h5 className="font-bold text-sm text-primary">Hello! I'm Devmini Gunaratne</h5>
+                  <p className="text-xs text-gray-500 leading-tight">Your dedicated Destination Expert. Let's plan your dream getaway!</p>
+                </div>
+              </div>
 
-               <div className="mb-6 space-y-3">
-                   <label className="block text-sm font-medium text-gray-700">Select Hotel Package</label>
+              <div className="mb-6 space-y-3">
+                <label className="block text-sm font-medium text-gray-700">Select Hotel Package</label>
 
-                   {/* Luxury Option */}
-                   {(tour.price_luxury || (tour.hotels_luxury && tour.hotels_luxury.length > 0) || true) && (
-                       <div
-                           onClick={() => setSelectedPackage('luxury')}
-                           className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
-                       >
-                           <div className="flex justify-between items-center">
-                               <span className="font-medium text-gray-700">Luxury Package</span>
-                               {tour.price_luxury ? (
-                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_luxury} per person</span>
-                               ) : null}
-                           </div>
-                       </div>
-                   )}
+                {/* Luxury Option */}
+                <div
+                  onClick={() => setSelectedPackage('luxury')}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Luxury Package</span>
+                    {tour.price_luxury ? (
+                      <span className="text-sm font-bold text-ceylon-700">+${tour.price_luxury} / person</span>
+                    ) : null}
+                  </div>
+                </div>
 
-                   {/* Semi-Luxury Option */}
-                   {(tour.price_semi_luxury || (tour.hotels_semi_luxury && tour.hotels_semi_luxury.length > 0) || true) && (
-                       <div
-                           onClick={() => setSelectedPackage('semi_luxury')}
-                           className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'semi_luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
-                       >
-                           <div className="flex justify-between items-center">
-                               <span className="font-medium text-gray-700">Semi-Luxury Package</span>
-                               {tour.price_semi_luxury ? (
-                                   <span className="text-sm font-bold text-ceylon-700">+${tour.price_semi_luxury} per person</span>
-                               ) : null}
-                           </div>
-                       </div>
-                   )}
-               </div>
+                {/* Semi-Luxury Option */}
+                <div
+                  onClick={() => setSelectedPackage('semi_luxury')}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'semi_luxury' ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Semi-Luxury Package</span>
+                    {tour.price_semi_luxury ? (
+                      <span className="text-sm font-bold text-ceylon-700">+${tour.price_semi_luxury} / person</span>
+                    ) : null}
+                  </div>
+                </div>
 
-               <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Travel Date</label>
-                   <div className="relative">
-                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                     <input type="date" className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none" />
-                   </div>
-                 </div>
-                 
-                 <div className="grid grid-cols-2 gap-4">
-                     <div>
-                       <label className="block text-sm font-medium text-gray-700 mb-1">Adults</label>
-                       <div className="relative">
-                         <input
-                            type="number"
-                            min="1"
-                            value={adults}
-                            onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value) || 1))}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none"
-                         />
-                       </div>
-                     </div>
-                     <div>
-                       <label className="block text-sm font-medium text-gray-700 mb-1">Children</label>
-                       <div className="relative">
-                         <input
-                            type="number"
-                            min="0"
-                            value={children}
-                            onChange={(e) => setChildren(Math.max(0, parseInt(e.target.value) || 0))}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none"
-                         />
-                       </div>
-                     </div>
-                 </div>
+                {/* Photography Add-on */}
+                {tour.price_photography ? (
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Add-ons</label>
+                    <div
+                      onClick={() => setIncludePhotography(prev => !prev)}
+                      className={`p-3 border rounded-lg cursor-pointer transition-all ${includePhotography ? 'border-ceylon-600 bg-ceylon-50' : 'border-gray-200 hover:border-ceylon-300'}`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-gray-700">Photography Package</span>
+                        <span className="text-sm font-bold text-ceylon-700">+${tour.price_photography} / person</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
 
-                 <div className="pt-2">
-                     <Button size="lg" className="w-full bg-green-500 hover:bg-green-600 text-white border-0 shadow-md">Book Now</Button>
-                     <div className="text-center mt-3">
-                         <a href="#" className="text-xs text-gray-500 italic hover:text-gray-700 underline">Have a coupon?</a>
-                     </div>
-                 </div>
-                 <p className="text-xs text-center text-gray-400 mt-4">*Our reply time is almost instant</p>
-               </form>
-               
-               <div className="mt-8 pt-6 border-t border-gray-100">
-                 <h5 className="font-semibold text-sm text-center mb-4">Why book with us?</h5>
-                 <div className="space-y-3">
-                   <div className="flex items-center text-sm text-gray-600">
-                     <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Best Price Guarantee
-                   </div>
-                   <div className="flex items-center text-sm text-gray-600">
-                     <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> No Hidden Fees
-                   </div>
-                   <div className="flex items-center text-sm text-gray-600">
-                     <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> 24/7 Local Support
-                   </div>
-                 </div>
-               </div>
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Travel Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input type="date" className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Adults</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={adults}
+                      onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Children</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={children}
+                      onChange={(e) => setChildren(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-ceylon-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button size="lg" className="w-full bg-green-500 hover:bg-green-600 text-white border-0 shadow-md">Book Now</Button>
+                  <div className="text-center mt-3">
+                    <a href="#" className="text-xs text-gray-500 italic hover:text-gray-700 underline">Have a coupon?</a>
+                  </div>
+                </div>
+                <p className="text-xs text-center text-gray-400 mt-4">*Our reply time is almost instant</p>
+              </form>
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <h5 className="font-semibold text-sm text-center mb-4">Why book with us?</h5>
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Best Price Guarantee
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> No Hidden Fees
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> 24/7 Local Support
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile scroll to booking button */}
+            <div className="lg:hidden fixed bottom-[184px] right-7 z-50">
+              <motion.button
+                onClick={scrollToBooking}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-center justify-center w-14 h-14 rounded-full bg-white border-2 border-ceylon-600 text-ceylon-600 shadow-xl hover:bg-ceylon-600 hover:text-white transition-colors"
+              >
+                <ChevronDown className="w-6 h-6" />
+              </motion.button>
             </div>
           </div>
 

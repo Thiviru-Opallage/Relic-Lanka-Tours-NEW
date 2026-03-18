@@ -22,6 +22,7 @@ export interface Tour {
   price_child?: number; // Base Child Price
   price_luxury?: number;
   price_semi_luxury?: number;
+  price_photography?: number;
   days: number;
   nights: number;
   category: 'Nature' | 'Culture' | 'Luxury' | 'Adventure';

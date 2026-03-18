@@ -48,7 +48,8 @@ const init = () => {
             "hotels_luxury TEXT",
             "hotels_semi_luxury TEXT",
             "price_child INTEGER",
-            "video_url TEXT"
+            "video_url TEXT",
+            "price_photography INTEGER"
         ];
 
         migrationColumns.forEach(colDef => {

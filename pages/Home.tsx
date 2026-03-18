@@ -28,25 +28,28 @@ export const Home: React.FC = () => {
       ? whyChooseUsImages
       : ['https://picsum.photos/600/800?random=50'];
 
+  const heroLength = displayImages.length;
+  const whyLength = displayWhyImages.length;
+
   useEffect(() => {
-    if (displayImages.length <= 1) return;
+    if (heroLength <= 1) return;
 
     const interval = setInterval(() => {
-        setCurrentHeroIndex(prev => (prev + 1) % displayImages.length);
-    }, 5000); // Change every 5 seconds
+      setCurrentHeroIndex(prev => (prev + 1) % heroLength);
+    }, 5000); //Changes every 5 seconds
 
     return () => clearInterval(interval);
-  }, [displayImages]);
+  }, [heroLength]);
 
   useEffect(() => {
-    if (displayWhyImages.length <= 1) return;
+    if (whyLength <= 1) return;
 
     const interval = setInterval(() => {
-        setCurrentWhyIndex(prev => (prev + 1) % displayWhyImages.length);
+      setCurrentWhyIndex(prev => (prev + 1) % whyLength);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [displayWhyImages]);
+  }, [whyLength]);
 
   return (
     <div className="w-full overflow-hidden">
@@ -57,13 +60,13 @@ export const Home: React.FC = () => {
           <AnimatePresence mode="wait">
               <motion.img
                 key={currentHeroIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
                 src={displayImages[currentHeroIndex]}
                 alt="Sri Lanka Coast"
                 className="w-full h-full object-cover absolute inset-0"
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: "0%", opacity: 1 }}
+                exit={{ x: "-100%", opacity: 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
               />
           </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60 z-10" />

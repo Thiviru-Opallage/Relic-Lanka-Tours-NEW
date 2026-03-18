@@ -83,16 +83,28 @@ const initDB = async () => {
                 destinations JSON,
                 activities JSON,
                 itinerary JSON,
-                video_url TEXT
+                video_url TEXT,
+                price_luxury INT DEFAULT 0,
+                price_semi_luxury INT DEFAULT 0,
+                hotels_luxury LONGTEXT,
+                hotels_semi_luxury LONGTEXT,
+                price_child INT DEFAULT 0,
+                price_photography INT DEFAULT 0
             )
         `);
 
         // Migrations
-        try {
-            await connection.query('ALTER TABLE tours ADD COLUMN video_url TEXT');
-        } catch (e) {
-            // Ignore error if column already exists
-        }
+        // try {
+        //     await connection.query('ALTER TABLE tours ADD COLUMN video_url TEXT');
+        // } catch (e) {
+        //     // Ignore error if column already exists
+        // }
+
+        // try {
+        //     await connection.query('ALTER TABLE tours ADD COLUMN price_photography INT DEFAULT 0');
+        // } catch (e) {
+        //     // Ignore error if column already exists
+        // }
 
         // Gallery
         await connection.query(`

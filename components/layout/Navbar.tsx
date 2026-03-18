@@ -3,11 +3,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Globe, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const { language, setLanguage, isTranslating } = useLanguage();
+  const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +24,14 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     setIsOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = () => setLangOpen(false);
+    if (langOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [langOpen]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -66,12 +77,47 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-             <Button variant="outline" size="sm" className="hidden lg:flex border-gray-200">
-               <Globe className="w-4 h-4 mr-2" /> EN
-             </Button>
-             <Link to="/contact">
-                <Button size="sm">Plan My Trip</Button>
-             </Link>
+            <div className="relative hidden lg:block">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center border-gray-200"
+                onClick={(e) =>{
+                  e.stopPropagation();
+                  setLangOpen(!langOpen);
+                }}
+              >
+                <Globe className={`w-4 h-4 mr-2 ${isTranslating ? "animate-spin" : ""}`} />
+                {isTranslating ? "Translating..." : language}
+              </Button>
+
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg">
+                  {[
+                    { code: "EN", name: "English" },
+                    { code: "JA", name: "Japanese" },
+                    { code: "FR", name: "French" },
+                    { code: "ZH-HANS", name: "Chinese" },
+                    { code: "AR", name: "Arabic" }
+                  ].map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLanguage(lang.code);
+                        setLangOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Link to="/contact">
+              <Button size="sm">Plan My Trip</Button>
+            </Link>
           </div>
 
           {/* Mobile Toggle */}

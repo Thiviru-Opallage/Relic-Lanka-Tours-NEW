@@ -26,6 +26,7 @@ import MapManager from './pages/admin/MapManager';
 import { ReviewManager } from './pages/admin/ReviewManager';
 import { Settings } from './pages/admin/Settings';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { LanguageProvider } from './context/LanguageContext';
 
 // ScrollToTop Component
 const ScrollToTop = () => {
@@ -54,34 +55,38 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <DataProvider>
+      <LanguageProvider>
+        <DataProvider>
           <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-              {/* Public Routes */}
-              <Route path="/" element={<Layout><Home /></Layout>} />
-              <Route path="/tours" element={<Layout><Tours /></Layout>} />
-              <Route path="/tours/:id" element={<Layout><TourDetail /></Layout>} />
-              <Route path="/gallery" element={<Layout><Gallery /></Layout>} />
-              <Route path="/about" element={<Layout><About /></Layout>} />
-              <Route path="/contact" element={<Layout><Contact /></Layout>} />
-              <Route path="/login" element={<Layout><Login /></Layout>} />
+            <div key={location.pathname}>
+              <Routes location={location}>
+                {/* Public Routes */}
+                <Route path="/" element={<Layout><Home /></Layout>} />
+                <Route path="/tours" element={<Layout><Tours /></Layout>} />
+                <Route path="/tours/:id" element={<Layout><TourDetail /></Layout>} />
+                <Route path="/gallery" element={<Layout><Gallery /></Layout>} />
+                <Route path="/about" element={<Layout><About /></Layout>} />
+                <Route path="/contact" element={<Layout><Contact /></Layout>} />
+                <Route path="/login" element={<Layout><Login /></Layout>} />
 
-              {/* Admin Routes */}
-              <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="tours" element={<TourManager />} />
-                  <Route path="tours/new" element={<TourForm />} />
-                  <Route path="tours/edit/:id" element={<TourForm />} />
-                  <Route path="gallery" element={<GalleryManager />} />
-                  <Route path="map" element={<MapManager />} />
-                  <Route path="reviews" element={<ReviewManager />} />
-                  <Route path="settings" element={<Settings />} />
-              </Route>
+                {/* Admin Routes */}
+                <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="tours" element={<TourManager />} />
+                    <Route path="tours/new" element={<TourForm />} />
+                    <Route path="tours/edit/:id" element={<TourForm />} />
+                    <Route path="gallery" element={<GalleryManager />} />
+                    <Route path="map" element={<MapManager />} />
+                    <Route path="reviews" element={<ReviewManager />} />
+                    <Route path="settings" element={<Settings />} />
+                </Route>
 
-              <Route path="*" element={<Layout><div className="h-screen flex items-center justify-center text-3xl font-serif">404 - Not Found</div></Layout>} />
-            </Routes>
+                <Route path="*" element={<Layout><div className="h-screen flex items-center justify-center text-3xl font-serif">404 - Not Found</div></Layout>} />
+              </Routes>
+            </div>
           </AnimatePresence>
-      </DataProvider>
+        </DataProvider>
+      </LanguageProvider>
     </AuthProvider>
   );
 };

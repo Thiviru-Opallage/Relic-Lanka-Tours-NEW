@@ -62,7 +62,7 @@ export const TourForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: ['price', 'price_child', 'days', 'nights', 'price_luxury', 'price_semi_luxury'].includes(name) ? Number(value) : value }));
+    setFormData(prev => ({ ...prev, [name]: ['price', 'price_child', 'days', 'nights', 'price_luxury', 'price_semi_luxury', 'price_photography'].includes(name) ? Number(value) : value }));
   };
 
   const handleArrayChange = (field: 'highlights' | 'inclusions' | 'includedActivities', index: number, value: string) => {
@@ -270,7 +270,11 @@ export const TourForm: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Semi-Luxury Extra Price ($)</label>
                 <input type="number" name="price_semi_luxury" value={formData.price_semi_luxury} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-ceylon-500 outline-none" />
             </div>
-             <div className="col-span-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Photography Package Price ($)</label>
+              <input type="number" name="price_photography" value={formData.price_photography || 0} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-ceylon-500 outline-none" />
+            </div>
+            <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Main Image</label>
                 <ImageUpload value={formData.image} onChange={(url) => setFormData(prev => ({ ...prev, image: url }))} />
             </div>

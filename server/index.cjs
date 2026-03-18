@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const deepl = require('deepl-node');
 
 /**
  * DATABASE CONFIGURATION
@@ -22,7 +23,8 @@ const fs = require('fs');
 
 const dotenv = require('dotenv');
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+const translator = new deepl.Translator(process.env.DEEPL_API_KEY);
 
 const db = process.env.DB_TYPE === 'mysql' ? require('./db_mysql.cjs') : require('./db.cjs');
 
@@ -129,7 +131,8 @@ app.get('/api/tours', async (req, res) => {
             itinerary: typeof row.itinerary === 'string' ? JSON.parse(row.itinerary) : row.itinerary,
             hotels_luxury: typeof row.hotels_luxury === 'string' ? JSON.parse(row.hotels_luxury) : row.hotels_luxury,
             hotels_semi_luxury: typeof row.hotels_semi_luxury === 'string' ? JSON.parse(row.hotels_semi_luxury) : row.hotels_semi_luxury,
-            price_child: row.price_child
+            price_child: row.price_child,
+            price_photography: row.price_photography || 0
       }));
       res.json(tours);
   } catch (err) {
@@ -140,7 +143,7 @@ app.get('/api/tours', async (req, res) => {
 // Create Tour (Protected)
 app.post('/api/tours', authenticateToken, async (req, res) => {
   const t = req.body;
-  const sql = `INSERT INTO tours VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT INTO tours VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   try {
       await db.query(sql, [
@@ -157,7 +160,8 @@ app.post('/api/tours', authenticateToken, async (req, res) => {
         JSON.stringify(t.hotels_luxury || []),
         JSON.stringify(t.hotels_semi_luxury || []),
         t.price_child || 0,
-        t.video_url || ''
+        t.video_url || '',
+        t.price_photography || 0
       ]);
       res.status(201).json(t);
   } catch (err) {
@@ -169,13 +173,16 @@ app.post('/api/tours', authenticateToken, async (req, res) => {
 app.put('/api/tours/:id', authenticateToken, async (req, res) => {
   const t = req.body;
   const { id } = req.params;
+  
+  console.log("Received tour update for id:", id);
+  console.log("price_photography received:", t.price_photography);
 
   const sql = `UPDATE tours SET
     title = ?, location = ?, price = ?, days = ?, nights = ?, category = ?,
     image = ?, description = ?, highlights = ?, inclusions = ?,
     includedActivities = ?, destinations = ?, activities = ?, itinerary = ?,
     price_luxury = ?, price_semi_luxury = ?, hotels_luxury = ?, hotels_semi_luxury = ?,
-    price_child = ?, video_url = ?
+    price_child = ?, video_url = ?,  price_photography = ?
     WHERE id = ?`;
 
   try {
@@ -194,6 +201,7 @@ app.put('/api/tours/:id', authenticateToken, async (req, res) => {
         JSON.stringify(t.hotels_semi_luxury || []),
         t.price_child || 0,
         t.video_url || '',
+        t.price_photography || 0,
         id
       ]);
       res.json({ message: "Tour updated", changes: result.affectedRows });
@@ -379,6 +387,25 @@ app.delete('/api/admin/reviews/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// --- TRANSLATE TEXT ---
+app.post("/api/translate", async (req, res) => {
+  try {
+    const { texts, targetLang } = req.body;
+
+    if (!texts || !Array.isArray(texts) || texts.length === 0) {
+      return res.status(400).json({ error: "texts array is required" });
+    }
+
+    const results = await translator.translateText(texts, null, targetLang);
+    const translatedTexts = results.map(r => r.text);
+
+    res.json({ translatedTexts });
+
+  } catch (error) {
+    console.error("Translation error:", error);
+    res.status(500).json({ error: "Translation failed" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
