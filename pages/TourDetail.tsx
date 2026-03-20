@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Calendar, CheckCircle, ChevronDown, User, ArrowLeft, Camera, Flag } from 'lucide-react';
+import { MapPin, Clock, Calendar, CheckCircle, User, ArrowLeft, Camera, Flag } from 'lucide-react';
 import { useData } from '../context/DataContext'; 
 import { Button } from '../components/ui/Button';
 import { Section } from '../components/ui/Section';
 import { TourCard } from '../components/features/TourCard';
+import { FaHandPointUp } from "react-icons/fa";
 
 export const TourDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -365,9 +366,9 @@ export const TourDetail: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex items-center justify-center w-14 h-14 rounded-full bg-white border-2 border-ceylon-600 text-ceylon-600 shadow-xl hover:bg-ceylon-600 hover:text-white transition-colors"
+                className="flex items-center justify-center w-14 h-14 rounded-full bg-white border-2 border-ceylon-600 text-ceylon-600 shadow-xl hover:bg-ceylon-600 hover:text-white transition-colors overflow-hidden"
               >
-                <ChevronDown className="w-6 h-6" />
+                <FaHandPointUp size={26}/>
               </motion.button>
             </div>
           </div>
